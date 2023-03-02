@@ -4,22 +4,44 @@ using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkitDemo.WPF.DataAccess;
 using CommunityToolkitDemo.WPF.Messages;
 using CommunityToolkitDemo.WPF.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace CommunityToolkitDemo.WPF.ViewModels
 {
-    public partial class NewToDoViewModel : ObservableObject
+    public partial class NewToDoViewModel : ObservableValidator
     {
         private readonly IToDoDataContext _DataContext;
 
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(AddToDoCommand))]
         private string description = string.Empty;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="dataContext">The DataContext injected with dependency injection</param>
         public NewToDoViewModel(IToDoDataContext dataContext)
         {
             _DataContext = dataContext;
         }
 
+        /// <summary>
+        /// Gets or sets the Description field for a new ToDo
+        /// </summary>
+        [Required]
+        public string Description
+        {
+            get => description;
+            set
+            {
+                // Set property and validate it
+                SetProperty(ref description, value, true);
+                // This will cause call to AddToDoCanExecute
+                AddToDoCommand.NotifyCanExecuteChanged();
+            }
+        }
+
+        /// <summary>
+        /// AddToDoCommand RelayCommand
+        /// </summary>
         [RelayCommand(CanExecute = nameof(AddToDoCanExecute))]
         private void AddToDo()
         {
@@ -28,23 +50,39 @@ namespace CommunityToolkitDemo.WPF.ViewModels
             _DataContext.SaveChanges();
             SendNewToDoCreatedMessage(toDo);
             ResetDescription();
+            ClearErrors();
         }
 
+        /// <summary>
+        /// Can the AddToDoCommand execute?
+        /// </summary>
+        /// <returns></returns>
         private bool AddToDoCanExecute()
         {
-            return !string.IsNullOrEmpty(Description);
+            return !string.IsNullOrWhiteSpace(Description);
         }
 
-        private ToDo CreateToDo() 
-        { 
+        /// <summary>
+        /// Creates a new ToDo
+        /// </summary>
+        /// <returns></returns>
+        private ToDo CreateToDo()
+        {
             return new ToDo { Description = Description };
         }
 
+        /// <summary>
+        /// Clears the Description field after a new ToDo is created
+        /// </summary>
         private void ResetDescription()
         {
             Description = string.Empty;
         }
 
+        /// <summary>
+        /// Sends message to MainViewModel with newly created ToDo that adds it to the list
+        /// </summary>
+        /// <param name="toDo"></param>
         private void SendNewToDoCreatedMessage(ToDo toDo)
         {
             WeakReferenceMessenger.Default.Send(new ToDoCreatedMessage(toDo));

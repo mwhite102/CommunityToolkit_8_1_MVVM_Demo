@@ -8,6 +8,38 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+
+        <!--  Validation Template  -->
+        <ControlTemplate x:Key="validationTemplate">
+            <DockPanel>
+                <TextBlock
+                    Margin="0,0,5,0"
+                    DockPanel.Dock="Right"
+                    FontSize="12"
+                    FontWeight="Bold"
+                    Foreground="Red">
+                    !
+                </TextBlock>
+                <Border BorderBrush="Red" BorderThickness="1">
+                    <AdornedElementPlaceholder />
+                </Border>
+            </DockPanel>
+        </ControlTemplate>
+
+        <!--  TextBox Error Tooltip  -->
+        <Style TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+                <Trigger Property="IsVisible" Value="false">
+                    <Setter Property="Validation.ErrorTemplate" Value="{x:Null}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -21,9 +53,10 @@
             Content="Description" />
         <TextBox
             Grid.Column="1"
-            Margin="3"
+            Margin="3,3,8,3"
             VerticalAlignment="Center"
-            Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}" />
+            Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"
+            Validation.ErrorTemplate="{StaticResource validationTemplate}" />
         <Button
             Grid.Column="2"
             Width="75"

@@ -13,6 +13,10 @@ namespace CommunityToolkitDemo.WPF.ViewModels
     {
         private readonly IToDoDataContext _DataContext;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="dataContext">The DataContext injected with dependency injection</param>
         public MainViewModel(IToDoDataContext dataContext)
         {
             _DataContext = dataContext;
@@ -20,9 +24,16 @@ namespace CommunityToolkitDemo.WPF.ViewModels
             LoadTodos();
         }
 
+        /// <summary>
+        /// Observable property with INotifyChanged created by source generators
+        /// </summary>
         [ObservableProperty]
         public ObservableCollection<ToDo> _ToDos = new();
 
+        /// <summary>
+        /// MarkToDoAsCompleteCommand RelayCommand
+        /// </summary>
+        /// <param name="toDo">The ToDo to mark as compelte</param>
         [RelayCommand]
         private void MarkToDoAsComplete(ToDo toDo)
         {
@@ -32,6 +43,9 @@ namespace CommunityToolkitDemo.WPF.ViewModels
             LoadTodos();
         }
 
+        /// <summary>
+        /// Loads existing ToDos from the DataContext
+        /// </summary>
         private void LoadTodos()
         {
             ToDos.Clear();
@@ -42,6 +56,9 @@ namespace CommunityToolkitDemo.WPF.ViewModels
             });
         }
 
+        /// <summary>
+        /// Register message to handle a new ToDo created message and adds to ToDos collection
+        /// </summary>
         private void RegisterMessages()
         {
             WeakReferenceMessenger.Default.Register<ToDoCreatedMessage>(this, (o, e) =>
